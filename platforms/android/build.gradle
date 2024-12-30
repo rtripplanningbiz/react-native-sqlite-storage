@@ -29,6 +29,10 @@ android {
     lintOptions {
         abortOnError false
     }
+
+    packagingOptions {
+        pickFirst 'lib/*/libsqlcipher.so'
+    }
 }
 
 repositories {
@@ -39,9 +43,17 @@ repositories {
     }
 }
 
+configurations.all {
+    resolutionStrategy {
+        force 'net.zetetic:android-database-sqlcipher:4.5.3'
+    }
+}
+
 dependencies {
     implementation "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
-    implementation 'net.zetetic:android-database-sqlcipher:4.5.3'
+    implementation('net.zetetic:android-database-sqlcipher:4.5.3') {
+        exclude group: 'net.zetetic', module: 'sqlcipher-android'
+    }
     implementation 'androidx.sqlite:sqlite:2.2.0'
     implementation 'androidx.sqlite:sqlite-framework:2.2.0'
     implementation 'androidx.core:core:1.7.0'

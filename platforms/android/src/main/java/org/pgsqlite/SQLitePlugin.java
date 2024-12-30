@@ -26,6 +26,7 @@ import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.module.annotations.ReactModule;
 import net.sqlcipher.database.SQLiteDatabase;
+import net.sqlcipher.database.SQLiteException;
 import net.sqlcipher.database.SQLiteStatement;
 
 import java.io.Closeable;
@@ -355,8 +356,12 @@ public class SQLitePlugin extends ReactContextBaseJavaModule {
             }
         }
 
-        SQLiteDatabase mydb = SQLiteDatabase.openDatabase(dbfile.getAbsolutePath(), key, null, openFlags);
-        return mydb;
+        try {
+            SQLiteDatabase mydb = SQLiteDatabase.openDatabase(dbfile.getAbsolutePath(), key, null, openFlags);
+            return mydb;
+        } catch (SQLiteException e) {
+            throw new Exception("Could not open database: " + e.getMessage());
+        }
     }
 
     /**
@@ -824,17 +829,10 @@ public class SQLitePlugin extends ReactContextBaseJavaModule {
         public void run() {
             try {
                 this.mydb = openDatabase(dbname, this.key, this.assetFilename, this.openFlags);
-            } catch (SQLiteException ex) {
-                FLog.e(TAG, "SQLite error opening database, stopping db thread", ex);
-                if (this.openCbc != null) {
-                    this.openCbc.error("Can't open database." + ex);
-                }
-                dbrmap.remove(dbname);
-                return;
             } catch (Exception ex) {
-                FLog.e(TAG, "Unexpected error opening database, stopping db thread", ex);
-                if(openCbc != null) {
-                    openCbc.error("Can't open database." + ex);
+                FLog.e(TAG, "Error opening database", ex);
+                if (this.openCbc != null) {
+                    this.openCbc.error("Could not open database: " + ex.getMessage());
                 }
                 dbrmap.remove(dbname);
                 return;

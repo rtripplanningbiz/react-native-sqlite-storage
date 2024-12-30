@@ -30,7 +30,12 @@ public class SQLitePluginPackage implements ReactPackage {
 
     @Override
     public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
-        SQLiteDatabase.loadLibs(reactContext);
+        try {
+            SQLiteDatabase.loadLibs(reactContext);
+        } catch (Exception e) {
+            // Handle initialization error
+            e.printStackTrace();
+        }
         List<NativeModule> modules = new ArrayList<>();
         modules.add(new SQLitePlugin(reactContext));
         return modules;

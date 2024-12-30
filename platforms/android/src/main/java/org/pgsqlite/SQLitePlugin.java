@@ -9,7 +9,10 @@ package org.pgsqlite;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.database.Cursor;
 import android.util.Base64;
+import androidx.sqlite.db.SupportSQLiteDatabase;
+import androidx.sqlite.db.SupportSQLiteStatement;
 import com.facebook.common.logging.FLog;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Callback;
@@ -23,9 +26,7 @@ import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.module.annotations.ReactModule;
 import net.sqlcipher.database.SQLiteDatabase;
-import net.sqlcipher.database.SQLiteException;
 import net.sqlcipher.database.SQLiteStatement;
-import net.sqlcipher.database.SQLiteCursor;
 
 import java.io.Closeable;
 import java.io.File;
@@ -457,7 +458,7 @@ public class SQLitePlugin extends ReactContextBaseJavaModule {
     @SuppressLint("NewApi")
     private boolean deleteDatabaseNow(String dbname) {
         File dbfile = this.getContext().getDatabasePath(dbname);
-        return SQLiteDatabase.deleteDatabase(dbfile);
+        return dbfile.delete();
     }
 
     /**
@@ -686,7 +687,7 @@ public class SQLitePlugin extends ReactContextBaseJavaModule {
                                                  CallbackContext cbc) throws Exception {
         WritableMap rowsResult = Arguments.createMap();
 
-        SQLiteCursor cur = null;
+        Cursor cur = null;
         try {
             try {
                 String[] params = new String[0];
@@ -702,7 +703,7 @@ public class SQLitePlugin extends ReactContextBaseJavaModule {
                     }
                 }
 
-                cur = (SQLiteCursor) mydb.rawQuery(query, params);
+                cur = mydb.rawQuery(query, params);
             } catch (Exception ex) {
                 FLog.e(TAG, "SQLitePlugin.executeSql[Batch]() failed", ex);
                 throw ex;
@@ -735,10 +736,8 @@ public class SQLitePlugin extends ReactContextBaseJavaModule {
     }
 
     @SuppressLint("NewApi")
-    private void bindRow(WritableMap row, String key, SQLiteCursor cur, int i) {
-        int curType = cur.getType(i);
-
-        switch (curType) {
+    private void bindRow(WritableMap row, String key, Cursor cur, int i) {
+        switch (cur.getType(i)) {
             case Cursor.FIELD_TYPE_NULL:
                 row.putNull(key);
                 break;
@@ -768,7 +767,7 @@ public class SQLitePlugin extends ReactContextBaseJavaModule {
         }
     }
 
-    private void closeQuietly(SQLiteCursor cursor) {
+    private void closeQuietly(Cursor cursor) {
         if (cursor != null) {
             try {
                 cursor.close();

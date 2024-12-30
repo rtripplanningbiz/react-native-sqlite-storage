@@ -11,22 +11,28 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteStatement;
+import android.util.Base64;
 import com.facebook.common.logging.FLog;
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.ReadableType;
+import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
-import java.io.Closeable;
+import com.facebook.react.module.annotations.ReactModule;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.IllegalArgumentException;
 import java.util.Locale;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,15 +42,12 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
-
-
-
+@ReactModule(name = SQLitePlugin.NAME)
 public class SQLitePlugin extends ReactContextBaseJavaModule {
 
+    static final String NAME = "SQLite";
+    
     public static final String TAG = SQLitePlugin.class.getSimpleName();
-
-    private static final String PLUGIN_NAME = "SQLite";
 
     private static final Pattern FIRST_WORD = Pattern.compile("^\\s*(\\S+)",
             Pattern.CASE_INSENSITIVE);
@@ -77,7 +80,7 @@ public class SQLitePlugin extends ReactContextBaseJavaModule {
      */
     @Override
     public String getName() {
-        return PLUGIN_NAME;
+        return NAME;
     }
 
     @ReactMethod

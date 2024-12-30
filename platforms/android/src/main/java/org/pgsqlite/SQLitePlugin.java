@@ -26,7 +26,9 @@ import com.facebook.react.bridge.ReadableType;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.module.annotations.ReactModule;
+import net.sqlcipher.database.SQLiteDatabase;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -855,19 +857,31 @@ public class SQLitePlugin extends ReactContextBaseJavaModule {
         }
     }
 
-    private void closeQuietly(SQLiteCursor closeable) {
-        closeable.close();
-    }
-
-    private void closeQuietly(SQLiteStatement closeable) {
-        closeable.close();
-    }
-
     private void closeQuietly(Closeable closeable) {
         if (closeable != null) {
             try {
                 closeable.close();
-            } catch (IOException ex) {
+            } catch (IOException e) {
+                // ignore
+            }
+        }
+    }
+
+    private void closeQuietly(Cursor cursor) {
+        if (cursor != null) {
+            try {
+                cursor.close();
+            } catch (Exception e) {
+                // ignore
+            }
+        }
+    }
+
+    private void closeQuietly(SQLiteStatement statement) {
+        if (statement != null) {
+            try {
+                statement.close();
+            } catch (Exception e) {
                 // ignore
             }
         }
